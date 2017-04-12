@@ -1,6 +1,7 @@
 package tn.com.viterbi.springboot.controller;
 
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class RestApiController {
 	// -------------------Retrieve All
 	// Users---------------------------------------------
 
-	@RequestMapping(value = "/user/", method = RequestMethod.GET)
+	@RequestMapping(value = "/user", method = RequestMethod.GET)
 	public ResponseEntity<List<User>> listAllUsers() {
 		List<User> users = userService.findAllUsers();
 		if (users.isEmpty()) {
@@ -50,7 +51,9 @@ public class RestApiController {
 		User user = userService.findById(id).get();
 		if (user == null) {
 			logger.error("User with id {} not found.", id);
-			return new ResponseEntity(new CustomErrorType("User with id " + id + " not found"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity(
+					new CustomErrorType("User with id " + id + " not found"),
+					HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<User>(user, HttpStatus.OK);
 	}
@@ -59,19 +62,23 @@ public class RestApiController {
 	// User-------------------------------------------
 
 	@RequestMapping(value = "/user/", method = RequestMethod.POST)
-	public ResponseEntity<?> createUser(@RequestBody User user, UriComponentsBuilder ucBuilder) {
+	public ResponseEntity<?> createUser(@RequestBody User user,
+			UriComponentsBuilder ucBuilder) {
 		logger.info("Creating User : {}", user);
 
 		if (userService.isUserExist(user)) {
-			logger.error("Unable to create. A User with name {} already exist", user.getName());
+			logger.error("Unable to create. A User with name {} already exist",
+					user.getName());
 			return new ResponseEntity(
-					new CustomErrorType("Unable to create. A User with name " + user.getName() + " already exist."),
+					new CustomErrorType("Unable to create. A User with name "
+							+ user.getName() + " already exist."),
 					HttpStatus.CONFLICT);
 		}
 		userService.saveUser(user);
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.setLocation(ucBuilder.path("/api/user/{id}").buildAndExpand(user.getId()).toUri());
+		headers.setLocation(
+				ucBuilder.path("/api/user/{id}").buildAndExpand(user.getId()).toUri());
 		return new ResponseEntity<String>(headers, HttpStatus.CREATED);
 	}
 
@@ -79,13 +86,16 @@ public class RestApiController {
 	// ------------------------------------------------
 
 	@RequestMapping(value = "/user/{id}", method = RequestMethod.PUT)
-	public ResponseEntity<?> updateUser(@PathVariable("id") long id, @RequestBody User user) {
+	public ResponseEntity<?> updateUser(@PathVariable("id") long id,
+			@RequestBody User user) {
 		logger.info("Updating User with id {}", id);
 
 		User currentUser = userService.findById(id).get();
 		if (currentUser == null) {
 			logger.error("Unable to update. User with id {} not found.", id);
-			return new ResponseEntity(new CustomErrorType("Unable to upate. User with id " + id + " not found."),
+			return new ResponseEntity(
+					new CustomErrorType(
+							"Unable to upate. User with id " + id + " not found."),
 					HttpStatus.NOT_FOUND);
 		}
 
@@ -107,7 +117,9 @@ public class RestApiController {
 		User user = userService.findById(id).get();
 		if (user == null) {
 			logger.error("Unable to delete. User with id {} not found.", id);
-			return new ResponseEntity(new CustomErrorType("Unable to delete. User with id " + id + " not found."),
+			return new ResponseEntity(
+					new CustomErrorType(
+							"Unable to delete. User with id " + id + " not found."),
 					HttpStatus.NOT_FOUND);
 		}
 		userService.deleteUserById(id);
